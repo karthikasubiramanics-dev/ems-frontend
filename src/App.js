@@ -6,23 +6,18 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [employees, setEmployees] = useState([]);
 
-  // Your deployed backend URL
+  // Render backend URL
   const BASE_URL = "https://ems-backend-l4vn.onrender.com";
 
-  // Fetch employees after successful login
+  // FIXED: Fetch employees after login
   useEffect(() => {
     if (isLoggedIn) {
       fetch(`${BASE_URL}/api/employees`)
         .then((response) => response.json())
         .then((data) => {
-          console.log("Employees:", data);
+          console.log("Employees Response:", data);
 
-          // If backend returns direct list
-          if (Array.isArray(data)) {
-            setEmployees(data);
-          }
-          // If backend returns wrapped response
-          else if (data.data) {
+          if (data.status === "SUCCESS") {
             setEmployees(data.data);
           } else {
             setEmployees([]);
@@ -35,29 +30,23 @@ function App() {
     }
   }, [isLoggedIn]);
 
-  // Corrected Login Method
+  // Login function
   const handleLogin = async () => {
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username: username,
-            password: password
-          })
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
 
       const result = await response.json();
 
       console.log("LOGIN RESPONSE:", result);
-
-      // Backend returns:
-      // { status: "SUCCESS", message: "Login successful", data: null }
 
       if (result.message === "Login successful") {
         alert("Login Success ✅");
@@ -72,7 +61,7 @@ function App() {
     }
   };
 
-  // After login → Show Employee Table
+  // After login → Show employee table
   if (isLoggedIn) {
     return (
       <div style={{ padding: "20px" }}>
@@ -111,7 +100,7 @@ function App() {
     );
   }
 
-  // Login Page UI
+  // Login page
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h1>Employee Management Login</h1>
@@ -122,9 +111,7 @@ function App() {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-
-      <br />
-      <br />
+      <br /><br />
 
       <input
         type="password"
@@ -132,9 +119,7 @@ function App() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-
-      <br />
-      <br />
+      <br /><br />
 
       <button onClick={handleLogin}>
         Login
