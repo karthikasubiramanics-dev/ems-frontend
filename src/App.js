@@ -6,7 +6,8 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [employees, setEmployees] = useState([]);
 
-  // Deployed backend URL
+  // IMPORTANT:
+  // Replace this with your actual Render backend URL
   const BASE_URL = "https://ems-backend-l4vn.onrender.com";
 
   // Fetch employees after login
@@ -15,17 +16,16 @@ function App() {
       fetch(`${BASE_URL}/api/employees`)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
-          setEmployees(data.data || []);
+          console.log("Employees:", data);
+          setEmployees(data);
         })
         .catch((error) => {
           console.error("Error fetching employees:", error);
-          alert("Failed to load employees");
+          alert("Failed to fetch employees");
         });
     }
   }, [isLoggedIn]);
 
-  // Login function
   const handleLogin = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -40,7 +40,7 @@ function App() {
       });
 
       const result = await response.json();
-      console.log(result);
+      console.log("Login Result:", result);
 
       if (result.message === "Login successful") {
         alert("Login Success");
@@ -50,7 +50,7 @@ function App() {
       }
 
     } catch (error) {
-      console.error(error);
+      console.error("Login Error:", error);
       alert("Server Error");
     }
   };
@@ -60,7 +60,8 @@ function App() {
     return (
       <div style={{ padding: "20px" }}>
         <h1>Employee Management System</h1>
-        <h2>Employee List</h2>
+        <h2>Welcome Admin ✅</h2>
+        <h3>Employee List</h3>
 
         {employees.length === 0 ? (
           <p>No employees found</p>
@@ -75,7 +76,6 @@ function App() {
                 <th>Salary</th>
               </tr>
             </thead>
-
             <tbody>
               {employees.map((emp) => (
                 <tr key={emp.id}>
@@ -93,28 +93,26 @@ function App() {
     );
   }
 
-  // Login page
+  // Login Page
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h2>Employee Management Login</h2>
+      <h1>Employee Management Login</h1>
 
       <input
         type="text"
-        placeholder="Username"
+        placeholder="Enter Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-
       <br />
       <br />
 
       <input
         type="password"
-        placeholder="Password"
+        placeholder="Enter Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-
       <br />
       <br />
 
