@@ -5,30 +5,45 @@ function App() {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const BASE_URL = "https://ems-backend-l4vn.onrender.com";
 
   // Fetch Employees
   useEffect(() => {
     if (isLoggedIn) {
-      fetch(`${BASE_URL}/api/employees`)
-        .then((response) => response.json())
-        .then((result) => {
-          console.log("EMPLOYEE RESPONSE:", result);
-
-          // IMPORTANT FIX
-          if (result.status === "SUCCESS") {
-            setEmployees(result.data);
-          } else {
-            setEmployees([]);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-          alert("Failed to fetch employees");
-        });
+      fetchEmployees();
     }
   }, [isLoggedIn]);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${BASE_URL}/api/employees`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      const result = await response.json();
+
+      console.log("EMPLOYEE RESPONSE:", result);
+
+      if (result.status === "SUCCESS") {
+        setEmployees(result.data);
+      } else {
+        setEmployees([]);
+      }
+
+    } catch (error) {
+      console.error("Fetch Error:", error);
+      alert("Failed to fetch employees");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Login
   const handleLogin = async () => {
@@ -56,21 +71,22 @@ function App() {
       }
 
     } catch (error) {
-      console.error(error);
+      console.error("Login Error:", error);
       alert("Server Error");
     }
   };
 
-  // After Login
+  // Employee Table Page
   if (isLoggedIn) {
     return (
       <div style={{ padding: "20px" }}>
         <h1>Employee Management System</h1>
         <h2>Welcome Admin ✅</h2>
-
         <h3>Employee List</h3>
 
-        {employees.length === 0 ? (
+        {loading ? (
+          <p>Loading employees...</p>
+        ) : employees.length === 0 ? (
           <p>No employees found</p>
         ) : (
           <table border="1" cellPadding="10" cellSpacing="0">
