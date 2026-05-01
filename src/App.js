@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
 
 function App() {
+  // Login states
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  // App states
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Backend URL (Render backend)
   const BASE_URL = "https://ems-backend-l4vn.onrender.com";
 
-  // Fetch Employees
+  // Fetch employees after login
   useEffect(() => {
     if (isLoggedIn) {
       fetchEmployees();
     }
   }, [isLoggedIn]);
 
+  // GET Employees
   const fetchEmployees = async () => {
     try {
       setLoading(true);
@@ -45,7 +50,7 @@ function App() {
     }
   };
 
-  // Login
+  // LOGIN
   const handleLogin = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -67,7 +72,7 @@ function App() {
         alert("Login Success ✅");
         setIsLoggedIn(true);
       } else {
-        alert(result.message);
+        alert(result.message || "Invalid login");
       }
 
     } catch (error) {
@@ -76,12 +81,34 @@ function App() {
     }
   };
 
+  // LOGOUT
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername("");
+    setPassword("");
+    setEmployees([]);
+  };
+
   // Employee Table Page
   if (isLoggedIn) {
     return (
       <div style={{ padding: "20px" }}>
         <h1>Employee Management System</h1>
         <h2>Welcome Admin ✅</h2>
+
+        <div style={{ marginBottom: "20px" }}>
+          <button onClick={fetchEmployees}>
+            Refresh Employees
+          </button>
+
+          <button
+            onClick={handleLogout}
+            style={{ marginLeft: "10px" }}
+          >
+            Logout
+          </button>
+        </div>
+
         <h3>Employee List</h3>
 
         {loading ? (
@@ -104,7 +131,7 @@ function App() {
               {employees.map((employee) => (
                 <tr key={employee.id}>
                   <td>{employee.id}</td>
-                  <td>{employee.name} </td>
+                  <td>{employee.name}</td>
                   <td>{employee.email}</td>
                   <td>{employee.department}</td>
                   <td>{employee.salary}</td>
