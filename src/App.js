@@ -101,13 +101,13 @@ function App() {
             </thead>
 
             <tbody>
-              {employees.map((emp) => (
-                <tr key={emp.id}>
-                  <td>{emp.id}</td>
-                  <td>{emp.name}</td>
-                  <td>{emp.email}</td>
-                  <td>{emp.department}</td>
-                  <td>{emp.salary}</td>
+              {employees.map((employee) => (
+                <tr key={employee.id}>
+                  <td>{employee.id}</td>
+                  <td>{employee.firstName} {employee.lastName}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.department}</td>
+                  <td>{employee.salary}</td>
                 </tr>
               ))}
             </tbody>
