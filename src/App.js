@@ -20,7 +20,7 @@ function App() {
   const [salary, setSalary] = useState("");
   const [editingId, setEditingId] = useState(null);
 
-  // Search
+  // Search state
   const [search, setSearch] = useState("");
 
   // =========================
@@ -40,6 +40,7 @@ function App() {
       emp.name?.toLowerCase().includes(search.toLowerCase()) ||
       emp.department?.toLowerCase().includes(search.toLowerCase())
     );
+
     setFilteredEmployees(filtered);
   }, [employees, search]);
 
@@ -65,7 +66,7 @@ function App() {
         alert("Login Success ✅");
         setIsLoggedIn(true);
       } else {
-        alert(result.message || "Login failed");
+        alert(result.message || "Login Failed");
       }
     } catch (error) {
       console.error(error);
@@ -74,7 +75,7 @@ function App() {
   };
 
   // =========================
-  // GET ALL EMPLOYEES
+  // FETCH EMPLOYEES
   // =========================
   const fetchEmployees = async () => {
     try {
@@ -146,7 +147,6 @@ function App() {
 
       resetForm();
       fetchEmployees();
-
     } catch (error) {
       console.error(error);
       alert("Save Failed");
@@ -154,11 +154,11 @@ function App() {
   };
 
   // =========================
-  // DELETE
+  // DELETE EMPLOYEE
   // =========================
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Are you sure to delete this employee?"
+      "Are you sure you want to delete this employee?"
     );
 
     if (!confirmDelete) return;
@@ -170,7 +170,6 @@ function App() {
 
       alert("Employee Deleted Successfully ✅");
       fetchEmployees();
-
     } catch (error) {
       console.error(error);
       alert("Delete Failed");
@@ -178,7 +177,7 @@ function App() {
   };
 
   // =========================
-  // UPDATE (Load Form)
+  // EDIT EMPLOYEE
   // =========================
   const handleEdit = (employee) => {
     setEditingId(employee.id);
@@ -189,7 +188,7 @@ function App() {
   };
 
   // =========================
-  // VIEW
+  // VIEW EMPLOYEE
   // =========================
   const handleView = (employee) => {
     alert(`
@@ -210,6 +209,7 @@ Salary: ${employee.salary}
     setUsername("");
     setPassword("");
     setEmployees([]);
+    setFilteredEmployees([]);
     resetForm();
   };
 
@@ -236,21 +236,19 @@ Salary: ${employee.salary}
           type="text"
           placeholder="Username"
           value={username}
-          onChange={(e) =>
-            setUsername(e.target.value)
-          }
+          onChange={(e) => setUsername(e.target.value)}
         />
-        <br /><br />
+        <br />
+        <br />
 
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <br /><br />
+        <br />
+        <br />
 
         <button onClick={handleLogin}>
           Login
@@ -275,55 +273,47 @@ Salary: ${employee.salary}
 
       {/* ADD / UPDATE FORM */}
       <h3>
-        {editingId
-          ? "Update Employee"
-          : "Add Employee"}
+        {editingId ? "Update Employee" : "Add Employee"}
       </h3>
 
       <input
         type="text"
         placeholder="Name"
         value={name}
-        onChange={(e) =>
-          setName(e.target.value)
-        }
+        onChange={(e) => setName(e.target.value)}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="email"
         placeholder="Email"
         value={email}
-        onChange={(e) =>
-          setEmail(e.target.value)
-        }
+        onChange={(e) => setEmail(e.target.value)}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="text"
         placeholder="Department"
         value={department}
-        onChange={(e) =>
-          setDepartment(e.target.value)
-        }
+        onChange={(e) => setDepartment(e.target.value)}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="number"
         placeholder="Salary"
         value={salary}
-        onChange={(e) =>
-          setSalary(e.target.value)
-        }
+        onChange={(e) => setSalary(e.target.value)}
       />
-      <br /><br />
+      <br />
+      <br />
 
       <button onClick={handleSubmit}>
-        {editingId
-          ? "Update Employee"
-          : "Add Employee"}
+        {editingId ? "Update Employee" : "Add Employee"}
       </button>
 
       <button
@@ -342,9 +332,7 @@ Salary: ${employee.salary}
         type="text"
         placeholder="Search by Name or Department"
         value={search}
-        onChange={(e) =>
-          setSearch(e.target.value)
-        }
+        onChange={(e) => setSearch(e.target.value)}
         style={{
           padding: "10px",
           width: "300px"
@@ -376,47 +364,39 @@ Salary: ${employee.salary}
           </thead>
 
           <tbody>
-            {filteredEmployees.map((employee) => (
-              <tr key={employee.id}>
-                <td>{employee.id}</td>
-                <td>{employee.name}</td>
-                <td>{employee.email}</td>
-                <td>{employee.department}</td>
-                <td>{employee.salary}</td>
+            {filteredEmployees
+              .sort((a, b) => a.id - b.id)
+              .map((employee) => (
+                <tr key={employee.id}>
+                  <td>{employee.id}</td>
+                  <td>{employee.name}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.department}</td>
+                  <td>{employee.salary}</td>
 
-                <td>
-                  <button
-                    onClick={() =>
-                      handleEdit(employee)
-                    }
-                  >
-                    Update
-                  </button>
+                  <td>
+                    <button
+                      onClick={() => handleEdit(employee)}
+                    >
+                      Update
+                    </button>
 
-                  <button
-                    onClick={() =>
-                      handleDelete(employee.id)
-                    }
-                    style={{
-                      marginLeft: "5px"
-                    }}
-                  >
-                    Delete
-                  </button>
+                    <button
+                      onClick={() => handleDelete(employee.id)}
+                      style={{ marginLeft: "5px" }}
+                    >
+                      Delete
+                    </button>
 
-                  <button
-                    onClick={() =>
-                      handleView(employee)
-                    }
-                    style={{
-                      marginLeft: "5px"
-                    }}
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <button
+                      onClick={() => handleView(employee)}
+                      style={{ marginLeft: "5px" }}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       )}
