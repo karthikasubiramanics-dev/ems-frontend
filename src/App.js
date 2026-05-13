@@ -18,7 +18,11 @@ function App() {
   const [email, setEmail] = useState("");
   const [department, setDepartment] = useState("");
   const [salary, setSalary] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(""); // ✅ NEW
   const [editingId, setEditingId] = useState(null);
+
+  // Validation errors
+  const [errors, setErrors] = useState({}); // ✅ NEW
 
   // Search state
   const [search, setSearch] = useState("");
@@ -54,10 +58,7 @@ function App() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          username,
-          password
-        })
+        body: JSON.stringify({ username, password })
       });
 
       const result = await response.json();
@@ -101,16 +102,14 @@ function App() {
   // ADD + UPDATE EMPLOYEE
   // =========================
   const handleSubmit = async () => {
-    if (!name || !email || !department || !salary) {
-      alert("Please fill all fields");
-      return;
-    }
+    setErrors({}); // clear old errors
 
     const employeeData = {
       name,
       email,
       department,
-      salary
+      salary: Number(salary),
+      phoneNumber
     };
 
     try {
@@ -137,7 +136,13 @@ function App() {
         });
       }
 
-      await response.json();
+      const result = await response.json();
+
+      // ✅ HANDLE VALIDATION ERRORS
+      if (response.status === 400) {
+        setErrors(result.data || {});
+        return;
+      }
 
       alert(
         editingId
@@ -147,6 +152,7 @@ function App() {
 
       resetForm();
       fetchEmployees();
+
     } catch (error) {
       console.error(error);
       alert("Save Failed");
@@ -157,18 +163,14 @@ function App() {
   // DELETE EMPLOYEE
   // =========================
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this employee?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Delete this employee?")) return;
 
     try {
       await fetch(`${BASE_URL}/api/employees/${id}`, {
         method: "DELETE"
       });
 
-      alert("Employee Deleted Successfully ✅");
+      alert("Employee Deleted ✅");
       fetchEmployees();
     } catch (error) {
       console.error(error);
@@ -185,6 +187,7 @@ function App() {
     setEmail(employee.email);
     setDepartment(employee.department);
     setSalary(employee.salary);
+    setPhoneNumber(employee.phoneNumber || "");
   };
 
   // =========================
@@ -198,6 +201,7 @@ Name: ${employee.name}
 Email: ${employee.email}
 Department: ${employee.department}
 Salary: ${employee.salary}
+Phone: ${employee.phoneNumber}
     `);
   };
 
@@ -221,7 +225,9 @@ Salary: ${employee.salary}
     setEmail("");
     setDepartment("");
     setSalary("");
+    setPhoneNumber("");
     setEditingId(null);
+    setErrors({});
   };
 
   // =========================
@@ -233,26 +239,19 @@ Salary: ${employee.salary}
         <h1>Employee Management Login</h1>
 
         <input
-          type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-        />
-        <br />
-        <br />
+        /><br /><br />
 
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <br />
+        /><br /><br />
 
-        <button onClick={handleLogin}>
-          Login
-        </button>
+        <button onClick={handleLogin}>Login</button>
       </div>
     );
   }
@@ -265,93 +264,52 @@ Salary: ${employee.salary}
       <h1>Employee Management System</h1>
       <h2>Welcome Admin ✅</h2>
 
-      <button onClick={handleLogout}>
-        Logout
-      </button>
+      <button onClick={handleLogout}>Logout</button>
 
       <hr />
 
-      {/* ADD / UPDATE FORM */}
-      <h3>
-        {editingId ? "Update Employee" : "Add Employee"}
-      </h3>
+      {/* FORM */}
+      <h3>{editingId ? "Update Employee" : "Add Employee"}</h3>
 
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <br />
-      <br />
+      <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+      <p style={{ color: "red" }}>{errors.name}</p>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <br />
-      <br />
+      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <p style={{ color: "red" }}>{errors.email}</p>
 
-      <input
-        type="text"
-        placeholder="Department"
-        value={department}
-        onChange={(e) => setDepartment(e.target.value)}
-      />
-      <br />
-      <br />
+      <input placeholder="Department" value={department} onChange={(e) => setDepartment(e.target.value)} />
+      <p style={{ color: "red" }}>{errors.department}</p>
 
-      <input
-        type="number"
-        placeholder="Salary"
-        value={salary}
-        onChange={(e) => setSalary(e.target.value)}
-      />
-      <br />
-      <br />
+      <input placeholder="Salary" value={salary} onChange={(e) => setSalary(e.target.value)} />
+      <p style={{ color: "red" }}>{errors.salary}</p>
+
+      <input placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+      <p style={{ color: "red" }}>{errors.phoneNumber}</p>
 
       <button onClick={handleSubmit}>
-        {editingId ? "Update Employee" : "Add Employee"}
+        {editingId ? "Update" : "Add"}
       </button>
 
-      <button
-        onClick={resetForm}
-        style={{ marginLeft: "10px" }}
-      >
+      <button onClick={resetForm} style={{ marginLeft: "10px" }}>
         Clear
       </button>
 
       <hr />
 
       {/* SEARCH */}
-      <h3>Search Employee</h3>
-
       <input
-        type="text"
-        placeholder="Search by Name or Department"
+        placeholder="Search by name or department"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{
-          padding: "10px",
-          width: "300px"
-        }}
       />
 
       <hr />
 
-      {/* EMPLOYEE TABLE */}
-      <h3>Employee List</h3>
-
+      {/* TABLE */}
       {loading ? (
-        <p>Loading employees...</p>
+        <p>Loading...</p>
       ) : (
-        <table
-          border="1"
-          cellPadding="10"
-          cellSpacing="0"
-        >
+        <table border="1" cellPadding="10">
           <thead>
             <tr>
               <th>ID</th>
@@ -359,44 +317,28 @@ Salary: ${employee.salary}
               <th>Email</th>
               <th>Department</th>
               <th>Salary</th>
+              <th>Phone</th>
               <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredEmployees
-              .sort((a, b) => a.id - b.id)
-              .map((employee) => (
-                <tr key={employee.id}>
-                  <td>{employee.id}</td>
-                  <td>{employee.name}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.department}</td>
-                  <td>{employee.salary}</td>
+            {filteredEmployees.map((emp) => (
+              <tr key={emp.id}>
+                <td>{emp.id}</td>
+                <td>{emp.name}</td>
+                <td>{emp.email}</td>
+                <td>{emp.department}</td>
+                <td>{emp.salary}</td>
+                <td>{emp.phoneNumber}</td>
 
-                  <td>
-                    <button
-                      onClick={() => handleEdit(employee)}
-                    >
-                      Update
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(employee.id)}
-                      style={{ marginLeft: "5px" }}
-                    >
-                      Delete
-                    </button>
-
-                    <button
-                      onClick={() => handleView(employee)}
-                      style={{ marginLeft: "5px" }}
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                <td>
+                  <button onClick={() => handleEdit(emp)}>Edit</button>
+                  <button onClick={() => handleDelete(emp.id)}>Delete</button>
+                  <button onClick={() => handleView(emp)}>View</button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
